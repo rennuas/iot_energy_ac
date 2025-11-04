@@ -6,13 +6,13 @@
 // ==============================
 // WiFi & MQTT CONFIG
 // ==============================
-const char* ssid       = "Dharma Legenda";
-const char* password   = "Dharma1000*";
+const char* ssid       = "";
+const char* password   = "*";
 
-const char* mqttServer = "a42a0cedeea647cb99d5cb2023cbb3f4.s1.eu.hivemq.cloud"; // perbaiki typo sebelumnya "locahost"
+const char* mqttServer = ""; // perbaiki typo sebelumnya "locahost"
 const uint16_t mqttPort = 8883;
-const char* mqttUser   = "iotenergy";
-const char* mqttPass   = "Pns12345";
+const char* mqttUser   = "";
+const char* mqttPass   = "";
 
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
@@ -82,6 +82,20 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
+  if(strcmp(topic, "iot_energy/trigger/conveyor/ac") == 0){
+
+    int turnOn   = doc["cmd"]["setTurnOn"];
+    int turnOff   = doc["cmd"]["setTurnOff"];
+
+    if(turnOn != 0){
+        digitalWrite(relayPins[turnOn + 1], HIGH);
+    }
+
+    if(turnOff != 0){
+       digitalWrite(relayPins[turnOn + 1], LOW);
+    }
+  }
+
   if(strcmp(topic, "iot_energy/trigger/ac/shutdown") == 0){
     for (size_t i = 0; i < 7; i++)
     {
@@ -137,6 +151,7 @@ void ensureMqtt() {
 
   client.subscribe("iot_energy/trigger/ac");
   client.subscribe("iot_energy/trigger/ac/shutdown");
+  client.subscribe("iot_energy/trigger/conveyor/ac");
 
   Serial.println("MQTT connected & subscribed.");
 }
